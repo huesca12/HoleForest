@@ -1,4 +1,5 @@
 import click
+import colorama
 from colorama import Fore
 import joblib
 import os
@@ -37,6 +38,8 @@ def run_model(df, output):
     success("Finalized output DataFrame.")
     if output is None:
         warn("No output path specified.")
+        if click.confirm("Would you like to print the output DataFrame?"):
+            print(output_df)
     else:
         if not output.endswith(".csv"):
             warn("Output file does not have the CSV extension.")
@@ -49,20 +52,21 @@ def run_model(df, output):
 
 
 @click.group()
-@click.option("-v", "--verbose", is_flag=True)
+@click.option("-v", "--verbose", is_flag=True, help="Print verbose/debug messages")
 def predict(verbose):
     global model, info, warn, success
     info = _info if verbose else lambda *args, **kwargs: None
     warn = _warn if verbose else lambda *args, **kwargs: None
     success = _success if verbose else lambda *args, **kwargs: None
+    colorama.init()
     info(f"Loading model from {MODEL_PATH}...")
     model = joblib.load(MODEL_PATH)
     success(f"Successfully loaded model.")
 
 
-@predict.command()
+@predict.command(help="Load CSV file of glitches")
 @click.argument("file")
-@click.option("--output", "-o")
+@click.option("--output", "-o", help="CSV output file path", metavar="")
 def csv(file, output):
     info(f"Loading {file} into DataFrame...")
     if not file.endswith(".csv"):
@@ -73,15 +77,15 @@ def csv(file, output):
     run_model(df, output)
 
 
-@predict.command()
-@click.option("--peak-freq", "-p", type=float)
-@click.option("--snr", "-s", type=float)
-@click.option("--amplitude", "-a", type=float)
-@click.option("--central-freq", "-c", type=float)
-@click.option("--duration", "-d", type=float)
-@click.option("--bandwidth", "-b", type=float)
-@click.option("--q-value", "-q", type=float)
-@click.option("--output", "-o")
+@predict.command(help="Input parameters of one glitch")
+@click.option("--peak-freq", "-p", type=float, metavar="")
+@click.option("--snr", "-s", type=float, metavar="")
+@click.option("--amplitude", "-a", type=float, metavar="")
+@click.option("--central-freq", "-c", type=float, metavar="")
+@click.option("--duration", "-d", type=float, metavar="")
+@click.option("--bandwidth", "-b", type=float, metavar="")
+@click.option("--q-value", "-q", type=float, metavar="")
+@click.option("--output", "-o", help="CSV output file path", metavar="")
 def glitch(peak_freq, snr, amplitude, central_freq, duration, bandwidth, q_value, output):
     if peak_freq is None:
         peak_freq = click.prompt("Peak Frequency", type=float)
