@@ -6,3 +6,9 @@ MatoneForest is a terminal-based tool for performing bulk and specific classific
 There are two ways to install MatoneForest on your machine:
 1. Manual Installation
 2. Docker Container
+
+### Manual Installation
+Begin by opening the directory where you would like to use MatoneForest in your terminal. Then clone the most recent version of this repository using the following command:
+```bash
+git clone
+```
