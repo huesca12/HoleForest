@@ -10,5 +10,9 @@ There are two ways to install HoleForest on your machine:
 ### Manual Installation
 Begin by opening the directory where you would like to use HoleForest in your terminal. Then clone the most recent version of this repository using the following command:
 ```bash
-git clone
+git clone https://github.com/huesca12/HoleForest.git
+```
+Install the required dependencies into your working environment by running the following command in the same directory as the requirements.txt file:
+```bash
+pip install -r requirements.txt
 ```
