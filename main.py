@@ -7,9 +7,9 @@ import os
 import pandas
 import sklearn
 
-MODEL_PATH = f"{os.path.abspath(os.path.dirname(__file__))}/model/model.joblib"
+DEFAULT_MODEL_PATH = f"{os.path.abspath(os.path.dirname(__file__))}/model/model.joblib"
 PARAM_LIST = ["peakFreq", "snr", "amplitude", "centralFreq", "duration", "bandwidth", "Q-value"]
-model_ = printout_ = info = warn = success = ...  # All will be modified before use
+model = printout_ = info = warn = success = ...  # All will be modified before use
 
 
 class HoleForestException(Exception):
@@ -18,7 +18,7 @@ class HoleForestException(Exception):
         return f"{Fore.RED}{super(HoleForestException, self).__str__()}{Fore.RESET}"
 
 
-class InvalidPath(HoleForestException):
+class InvalidPath(HoleForestException, FileNotFoundError):
     """Raised when a path to a file does not exist"""
 
 
@@ -61,7 +61,7 @@ def validate_dataframe(dataframe, file):
 
 def run_model(df, output):
     info("Running model predictions...")
-    predictions = model_.predict(df[PARAM_LIST])
+    predictions = model.predict(df[PARAM_LIST])
     success("Extracted predictions.")
     info("Running model confidence...")
     probas = ...
@@ -118,16 +118,15 @@ def train(file, output):
 
 
 @main.group(help="Predict glitch(es) type(s)")
-@click.option("--model", "-m", help="Path to ML model", default="model/model.joblib", metavar="", show_default=True)
+@click.option("--model-path", "-m", help="Path to ML model", default=DEFAULT_MODEL_PATH, metavar="", show_default=True)
 @click.option("--printout", "-p", is_flag=True, help="Print output DataFrame")
-def predict(model, printout):
-    global printout_, model_, MODEL_PATH
+def predict(model_path, printout):
+    global model, printout_
     printout_ = printout
-    MODEL_PATH = model
-    info(f"Loading model from {MODEL_PATH}...")
-    validate_path(MODEL_PATH)
-    validate_extension(MODEL_PATH, ".joblib")
-    model_ = joblib.load(MODEL_PATH)
+    info(f"Loading model from {model_path}...")
+    validate_path(model_path)
+    validate_extension(model_path, ".joblib")
+    model = joblib.load(model_path)
     success(f"Successfully loaded model.")
 
 
