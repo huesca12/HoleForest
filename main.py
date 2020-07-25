@@ -57,7 +57,6 @@ def validate_dataframe(dataframe, file):
         warn("DataFrame failed verification.")
         raise MissingColumns(f"DataFrame ({file}) missing necessary column(s).")
     success("Verified DataFrame structure!")
-    return df
 
 
 def run_model(df, output):
