@@ -12,6 +12,20 @@ PARAM_LIST = ["peakFreq", "snr", "amplitude", "centralFreq", "duration", "bandwi
 model_ = printout_ = info = warn = success = ...  # All will be modified before use
 
 
+class HoleForestException(Exception):
+    """Base exception class"""
+    def __str__(self):
+        return f"{Fore.RED}{super(HoleForestException, self).__str__()}{Fore.RESET}"
+
+
+class InvalidPath(HoleForestException):
+    """Raised when a path to a file does not exist"""
+
+
+class MissingColumns(HoleForestException):
+    """Raised when an input CSV does not have the necessary columns"""
+
+
 def _info(msg, *args, **kwargs):
     print(f"[~] {msg}", *args, **kwargs)
 
@@ -24,9 +38,31 @@ def _success(msg, *args, **kwargs):
     print(f"{Fore.GREEN}[+] {msg}{Fore.RESET}", *args, **kwargs)
 
 
+def validate_path(path):
+    if not os.path.exists(path):
+        warn(f"Path to file ({path}) not found.")
+        raise InvalidPath(f"{path} does not exist")
+
+
+def validate_extension(path, ext):
+    if not path.endswith(ext):
+        warn(f"File ({path}) does not have the {ext} extension.")
+        return False
+    return True
+
+
+def validate_dataframe(dataframe, file):
+    info(f"Verifying DataFrame columns...")
+    if not all(param in dataframe for param in PARAM_LIST):
+        warn("DataFrame failed verification.")
+        raise MissingColumns(f"DataFrame ({file}) missing necessary column(s).")
+    success("Verified DataFrame structure!")
+    return df
+
+
 def run_model(df, output):
     info("Running model predictions...")
-    predictions = model_.predict(df)
+    predictions = model_.predict(df[PARAM_LIST])
     success("Extracted predictions.")
     info("Running model confidence...")
     probas = ...
@@ -46,8 +82,7 @@ def run_model(df, output):
             if click.confirm("Would you like to print the output DataFrame?"):
                 print(output_df)
     else:
-        if not output.endswith(".csv"):
-            warn("Output file does not have the CSV extension.")
+        if not validate_extension(output, ".csv"):
             output = f"{output}.csv"
             warn(f"Added CSV extension (new output: {output}).")
         if os.path.exists(output):
@@ -67,21 +102,19 @@ def main(verbose):
 
 
 @main.command(help="Train an ML model from CSV data set")
-@click.argument("file", help="CSV of glitches for training")
-@click.argument("output", help="Output .joblib trained model file")
+@click.argument("file")
+@click.argument("output")
 def train(file, output):
     info(f"Loading input CSV {file}...")
-    if not os.path.exists(file):
-        warn(f"Path to input file ({file}) not found.")
-    if not file.endswith(".csv"):
-        warn("Input file does not have the CSV extension.")
+    validate_path(file)
+    validate_extension(file, ".csv")
+    df = pandas.read_csv(file)
+    validate_dataframe(df, file)
     success(f"Loaded {file}!")
-    if not output.endswith(".joblib"):
-        warn(f"Output path does not have the .joblib extension.")
+    if not validate_extension(output, ".joblib"):
         output = f"{output}.joblib"
         warn(f"Added .joblib extension (new output: {output}).")
     info("Training model...")
-    ...
     success("Trained new model successfully!")
 
 
@@ -93,24 +126,23 @@ def predict(model, printout):
     printout_ = printout
     MODEL_PATH = model
     info(f"Loading model from {MODEL_PATH}...")
-    if not os.path.exists(MODEL_PATH):
-        warn(f"Path to model ({MODEL_PATH}) not found.")
-    if not MODEL_PATH.endswith(".joblib"):
-        warn(f"Model file does not have the .joblib extension.")
+    validate_path(MODEL_PATH)
+    validate_extension(MODEL_PATH, ".joblib")
     model_ = joblib.load(MODEL_PATH)
     success(f"Successfully loaded model.")
 
 
 @predict.command(help="Load CSV file of glitches")
-@click.argument("file", help="CSV of glitches")
+@click.argument("file")
 @click.option("--output", "-o", help="CSV output file path", metavar="")
-def csv(file, output):
+@click.option("--delete-extras", "-d", is_flag=True, help="Remove extra columns from input to output")
+def csv(file, output, delete_extras):
     info(f"Loading {file} into DataFrame...")
-    if not os.path.exists(file):
-        warn(f"Path to input file ({file}) not found.")
-    if not file.endswith(".csv"):
-        warn("Input file does not have the CSV extension.")
-    df = pandas.read_csv(file)[PARAM_LIST]
+    validate_path(file)
+    validate_extension(file, ".csv")
+    df = pandas.read_csv(file)
+    validate_dataframe(df, file)
+    df = pandas.read_csv(file)[PARAM_LIST] if delete_extras else df
     success(f"{file} successfully loaded.")
     info(f"Starting model...")
     run_model(df, output)
@@ -151,6 +183,7 @@ def glitch(peak_freq, snr, amplitude, central_freq, duration, bandwidth, q_value
 
 @main.resultcallback()
 def process_result(_, **__):
+    colorama.deinit()
     success(f"Finished")
 
 
