@@ -8,7 +8,7 @@ There are two ways to install HoleForest on your machine:
 2. Docker Container
 
 ### Manual Installation
-Begin by opening the directory where you would like to use HoleForest in your terminal. Then clone the most recent version of this repository using the following command:
+Begin by opening the directory where you would like to install HoleForest in your terminal. Then clone the most recent version of this repository using the following command:
 ```bash
 git clone https://github.com/huesca12/HoleForest.git
 ```
@@ -16,3 +16,4 @@ Install the required dependencies into your working environment by running the f
 ```bash
 pip install -r requirements.txt
 ```
+You should now be able to run HoleForest using the command: 
