@@ -21,7 +21,7 @@ You should now be able to run HoleForest by using the command in the same direct
 python main.py
 ```
 ### Docker
-Ensure that Docker is installed in your working envrionemtn using:
+Ensure that Docker is installed in your working enviroment using:
 ```bash
 docker info
 ```
