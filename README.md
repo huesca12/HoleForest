@@ -20,3 +20,4 @@ You should now be able to run HoleForest by using the command in the same direct
 ```bash
 python main.py
 ```
+### Docker
