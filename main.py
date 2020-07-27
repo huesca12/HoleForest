@@ -7,7 +7,7 @@ import os
 import pandas
 import sklearn
 
-np.random.seed(12)
+numpy.random.seed(12)
 
 DEFAULT_MODEL_PATH = f"{os.path.abspath(os.path.dirname(__file__))}/model/model.joblib"
 PARAM_LIST = ["peakFreq", "snr", "amplitude", "centralFreq", "duration", "bandwidth", "Q-value"]
@@ -70,10 +70,10 @@ def run_model(df, output, num_preds=3):
     prediction3 = [preds[2] for preds in predictions]
     success("Extracted predictions.")
     info("Running model confidence...")
-    probas = model.predict_proba(params_only)[:, 1]
-    proba1 = ...
-    proba2 = ...
-    proba3 = ...
+    probabilities = [sorted(probas, reverse=True)[:num_preds] for probas in model.predict_proba(params_only)]
+    proba1 = [probas[0] for probas in probabilities]
+    proba2 = [probas[1] for probas in probabilities]
+    proba3 = [probas[2] for probas in probabilities]
     success("Extracted confidence.")
     info("Initializing output...")
     output_df = df
