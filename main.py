@@ -7,10 +7,8 @@ import os
 import pandas as pd
 import sklearn
 
-np.random.seed(12)
-
-DEFAULT_MODEL_PATH = f"{os.path.abspath(os.path.dirname(__file__))}" \
-                     f"/model/model.joblib"
+DEFAULT_MODEL_PATH = f"{os.path.abspath(os.path.dirname(__file__))}" + \
+                     "/model/model.joblib"
 PARAM_LIST = ["peakFreq", "snr", "amplitude", "centralFreq",
               "duration", "bandwidth", "Q-value"]
 model = count_ = printout_ = info = warn = success = ...
@@ -136,6 +134,7 @@ def main(verbose):
 @click.argument("file")
 @click.argument("output")
 def train(file, output):
+    np.random.seed(12)
     info(f"Loading input CSV {file}...")
     validate_path(file)
     validate_extension(file, ".csv")
@@ -159,6 +158,7 @@ def predict(model_path, printout, count):
     global model, count_, printout_
     count_ = count
     printout_ = printout
+
     info(f"Loading model from {model_path}...")
     validate_path(model_path)
     validate_extension(model_path, ".joblib")
@@ -184,6 +184,7 @@ def csv(file, output, delete_extras):
     validate_dataframe(df, file)
     df = pd.read_csv(file)[PARAM_LIST] if delete_extras else df
     success(f"{file} successfully loaded.")
+
     info(f"Starting model...")
     run_model(df, output)
 
@@ -229,6 +230,7 @@ def glitch(
         {param: val for (param, val) in zip(PARAM_LIST, params)}, index=[0]
     )
     success(f"Parameters successfully loaded.")
+
     info(f"Starting model...")
     run_model(df, output)
 
