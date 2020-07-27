@@ -7,6 +7,8 @@ import os
 import pandas
 import sklearn
 
+np.random.seed(12)
+
 DEFAULT_MODEL_PATH = f"{os.path.abspath(os.path.dirname(__file__))}/model/model.joblib"
 PARAM_LIST = ["peakFreq", "snr", "amplitude", "centralFreq", "duration", "bandwidth", "Q-value"]
 model = printout_ = info = warn = success = ...  # All will be modified before use
