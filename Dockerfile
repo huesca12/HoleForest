@@ -10,3 +10,4 @@ RUN pip install pandas
 RUN pip install scikit-learn
 
 CMD ["python", "./main.py"]
+CMD tail -f /dev/null
