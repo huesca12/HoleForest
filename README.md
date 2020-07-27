@@ -16,4 +16,7 @@ Install the required dependencies into your working environment by running the f
 ```bash
 pip install -r requirements.txt
 ```
-You should now be able to run HoleForest using the command: 
+You should now be able to run HoleForest by using the command in the same directory as ```main.py```: 
+```bash
+python main.py
+```
