@@ -59,19 +59,30 @@ def validate_dataframe(dataframe, file):
     success("Verified DataFrame structure!")
 
 
-def run_model(df, output):
+def run_model(df, output, num_preds=3):
+    params_only = df[PARAM_LIST]
     info("Running model predictions...")
-    predictions = model.predict(df[PARAM_LIST])
+    predictions = model.classes_[numpy.argsort(model.predict_proba(params_only))[:, :-num_preds - 1:-1]]
+    prediction1 = [preds[0] for preds in predictions]
+    prediction2 = [preds[1] for preds in predictions]
+    prediction3 = [preds[2] for preds in predictions]
     success("Extracted predictions.")
     info("Running model confidence...")
-    probas = ...
+    probas = model.predict_proba(params_only)[:, 1]
+    proba1 = ...
+    proba2 = ...
+    proba3 = ...
     success("Extracted confidence.")
     info("Initializing output...")
     output_df = df
     info("Writing output predictions...")
-    output_df["prediction"] = predictions
+    output_df["prediction1"] = prediction1
+    output_df["prediction2"] = prediction2
+    output_df["prediction3"] = prediction3
     info("Writing output confidence...")
-    output_df["confidence"] = probas
+    output_df["prediction1 prob"] = proba1
+    output_df["prediction2 prob"] = proba2
+    output_df["prediction3 prob"] = proba3
     success("Finalized output DataFrame.")
     if printout_:
         print(output_df)
