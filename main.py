@@ -2,22 +2,26 @@ import click
 import colorama
 from colorama import Fore
 import joblib
-import numpy
+import numpy as np
 import os
-import pandas
+import pandas as pd
 import sklearn
 
-numpy.random.seed(12)
+np.random.seed(12)
 
-DEFAULT_MODEL_PATH = f"{os.path.abspath(os.path.dirname(__file__))}/model/model.joblib"
-PARAM_LIST = ["peakFreq", "snr", "amplitude", "centralFreq", "duration", "bandwidth", "Q-value"]
-model = printout_ = info = warn = success = ...  # All will be modified before use
+DEFAULT_MODEL_PATH = f"{os.path.abspath(os.path.dirname(__file__))}" \
+                     f"/model/model.joblib"
+PARAM_LIST = ["peakFreq", "snr", "amplitude", "centralFreq",
+              "duration", "bandwidth", "Q-value"]
+model = count_ = printout_ = info = warn = success = ...
 
 
 class HoleForestException(Exception):
     """Base exception class"""
     def __str__(self):
-        return f"{Fore.RED}{super(HoleForestException, self).__str__()}{Fore.RESET}"
+        return {Fore.RED}, \
+               super(HoleForestException, self).__str__(), \
+               {Fore.RESET}
 
 
 class InvalidPath(HoleForestException, FileNotFoundError):
@@ -26,6 +30,10 @@ class InvalidPath(HoleForestException, FileNotFoundError):
 
 class MissingColumns(HoleForestException):
     """Raised when an input CSV does not have the necessary columns"""
+
+
+class CountTooHigh(HoleForestException):
+    """Raised when the count option is greater than the number of labels"""
 
 
 def _info(msg, *args, **kwargs):
@@ -57,54 +65,65 @@ def validate_dataframe(dataframe, file):
     info(f"Verifying DataFrame columns...")
     if not all(param in dataframe for param in PARAM_LIST):
         warn("DataFrame failed verification.")
-        raise MissingColumns(f"DataFrame ({file}) missing necessary column(s).")
+        raise MissingColumns(
+            f"DataFrame ({file}) missing necessary column(s)."
+        )
     success("Verified DataFrame structure!")
 
 
-def run_model(df, output, num_preds=3):
-    params_only = df[PARAM_LIST]
+def run_model(df, output):
+    guesses = model.predict_proba(df[PARAM_LIST])
+
     info("Running model predictions...")
-    predictions = model.classes_[numpy.argsort(model.predict_proba(params_only))[:, :-num_preds - 1:-1]]
-    prediction1 = [preds[0] for preds in predictions]
-    prediction2 = [preds[1] for preds in predictions]
-    prediction3 = [preds[2] for preds in predictions]
+    predictions = model.classes_[np.argsort(guesses)[:, :-count_ - 1:-1]]
+    predictions = [
+        [preds[i] for preds in predictions] for i in range(count_)
+    ]
     success("Extracted predictions.")
+
     info("Running model confidence...")
-    probabilities = [sorted(probas, reverse=True)[:num_preds] for probas in model.predict_proba(params_only)]
-    proba1 = [probas[0] for probas in probabilities]
-    proba2 = [probas[1] for probas in probabilities]
-    proba3 = [probas[2] for probas in probabilities]
+    probabilities = [
+        sorted(probas, reverse=True)[:count_] for probas in guesses
+    ]
+    probabilities = [
+        [probas[i] for probas in probabilities] for i in range(count_)
+    ]
     success("Extracted confidence.")
+
     info("Initializing output...")
     output_df = df
+
     info("Writing output predictions...")
-    output_df["prediction1"] = prediction1
-    output_df["prediction2"] = prediction2
-    output_df["prediction3"] = prediction3
+    for i, prediction in enumerate(predictions, start=1):
+        df[f"prediction{i}"] = prediction
     info("Writing output confidence...")
-    output_df["prediction1 prob"] = proba1
-    output_df["prediction2 prob"] = proba2
-    output_df["prediction3 prob"] = proba3
+    for i, proba in enumerate(probabilities, start=1):
+        df[f"p{i} confidence"] = proba
     success("Finalized output DataFrame.")
+
     if printout_:
         print(output_df)
-    if output is None:
+    elif output is None:
         warn("No output path specified.")
-        if not printout_:
-            if click.confirm("Would you like to print the output DataFrame?"):
-                print(output_df)
+        if click.confirm("Would you like to print the output DataFrame?"):
+            print(output_df)
     else:
         if not validate_extension(output, ".csv"):
             output = f"{output}.csv"
             warn(f"Added CSV extension (new output: {output}).")
         if os.path.exists(output):
-            click.confirm(f"Output path {output} already exists. Do you want to overwrite?", abort=True)
+            click.confirm(
+                f"Output path {output} already exists."
+                "Do you want to overwrite?",
+                abort=True
+            )
         output_df.to_csv(output, index=False)
         success(f"Saved output to {output}")
 
 
 @click.group()
-@click.option("-v", "--verbose", is_flag=True, help="Print verbose/debug messages")
+@click.option("-v", "--verbose",
+              is_flag=True, help="Print verbose/debug messages")
 def main(verbose):
     global info, warn, success
     info = _info if verbose else lambda *args, **kwargs: None
@@ -120,7 +139,7 @@ def train(file, output):
     info(f"Loading input CSV {file}...")
     validate_path(file)
     validate_extension(file, ".csv")
-    df = pandas.read_csv(file)
+    df = pd.read_csv(file)
     validate_dataframe(df, file)
     success(f"Loaded {file}!")
     if not validate_extension(output, ".joblib"):
@@ -131,29 +150,39 @@ def train(file, output):
 
 
 @main.group(help="Predict glitch(es) type(s)")
-@click.option("--model-path", "-m", help="Path to ML model", default=DEFAULT_MODEL_PATH, metavar="", show_default=True)
+@click.option("--model-path", "-m", help="Path to ML model",
+              default=DEFAULT_MODEL_PATH, metavar="", show_default=True)
 @click.option("--printout", "-p", is_flag=True, help="Print output DataFrame")
-def predict(model_path, printout):
-    global model, printout_
+@click.option("--count", "-c", help="How many predictions to extract",
+              default=3, show_default=True)
+def predict(model_path, printout, count):
+    global model, count_, printout_
+    count_ = count
     printout_ = printout
     info(f"Loading model from {model_path}...")
     validate_path(model_path)
     validate_extension(model_path, ".joblib")
     model = joblib.load(model_path)
+    if count > len(model.classes_):
+        raise CountTooHigh(
+            f"Count ({count}) is larger than "
+            f"# of labels ({len(model.classes_)})"
+        )
     success(f"Successfully loaded model.")
 
 
 @predict.command(help="Load CSV file of glitches")
 @click.argument("file")
 @click.option("--output", "-o", help="CSV output file path", metavar="")
-@click.option("--delete-extras", "-d", is_flag=True, help="Remove extra columns from input to output")
+@click.option("--delete-extras", "-d", is_flag=True,
+              help="Remove extra columns from input to output")
 def csv(file, output, delete_extras):
     info(f"Loading {file} into DataFrame...")
     validate_path(file)
     validate_extension(file, ".csv")
-    df = pandas.read_csv(file)
+    df = pd.read_csv(file)
     validate_dataframe(df, file)
-    df = pandas.read_csv(file)[PARAM_LIST] if delete_extras else df
+    df = pd.read_csv(file)[PARAM_LIST] if delete_extras else df
     success(f"{file} successfully loaded.")
     info(f"Starting model...")
     run_model(df, output)
@@ -168,7 +197,16 @@ def csv(file, output, delete_extras):
 @click.option("--bandwidth", "-b", type=float, metavar="")
 @click.option("--q-value", "-q", type=float, metavar="")
 @click.option("--output", "-o", help="CSV output file path", metavar="")
-def glitch(peak_freq, snr, amplitude, central_freq, duration, bandwidth, q_value, output):
+def glitch(
+        peak_freq,
+        snr,
+        amplitude,
+        central_freq,
+        duration,
+        bandwidth,
+        q_value,
+        output
+):
     if peak_freq is None:
         peak_freq = click.prompt("Peak Frequency", type=float)
     if snr is None:
@@ -183,10 +221,13 @@ def glitch(peak_freq, snr, amplitude, central_freq, duration, bandwidth, q_value
         bandwidth = click.prompt("Bandwidth", type=float)
     if q_value is None:
         q_value = click.prompt("Q-Value", type=float)
-    params = [peak_freq, snr, amplitude, central_freq, duration, bandwidth, q_value]
+    params = [peak_freq, snr, amplitude, central_freq,
+              duration, bandwidth, q_value]
 
     info(f"Loading parameters into DataFrame...")
-    df = pandas.DataFrame({param: val for (param, val) in zip(PARAM_LIST, params)}, index=[0])
+    df = pd.DataFrame(
+        {param: val for (param, val) in zip(PARAM_LIST, params)}, index=[0]
+    )
     success(f"Parameters successfully loaded.")
     info(f"Starting model...")
     run_model(df, output)
