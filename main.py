@@ -18,7 +18,7 @@ PARAMS = [
     "Q-value"
 ]
 # Globals
-model = opcount = opprintout = opverbose
+model = opcount = opprintout = opverbose = ...
 
 
 class HoleForestException(Exception):
