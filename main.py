@@ -1,3 +1,4 @@
+import click
 from click import argument as arg, command, group, option as opt
 import colorama
 from colorama import Fore
@@ -83,18 +84,18 @@ def run_model(df, output):
     guesses = model.predict_proba(df[PARAMS])
 
     info("Running model predictions...")
-    predictions = model.classes_[np.argsort(guesses)[:, :-count_ - 1:-1]]
+    predictions = model.classes_[np.argsort(guesses)[:, :-opcount - 1:-1]]
     predictions = [
-        [preds[i] for preds in predictions] for i in range(count_)
+        [preds[i] for preds in predictions] for i in range(opcount)
     ]
     success("Extracted predictions.")
 
     info("Running model confidence...")
     probabilities = [
-        sorted(probas, reverse=True)[:count_] for probas in guesses
+        sorted(probas, reverse=True)[:opcount] for probas in guesses
     ]
     probabilities = [
-        [probas[i] for probas in probabilities] for i in range(count_)
+        [probas[i] for probas in probabilities] for i in range(opcount)
     ]
     success("Extracted confidence.")
 
@@ -109,18 +110,18 @@ def run_model(df, output):
         df[f"p{i} confidence"] = proba
     success("Finalized output DataFrame.")
 
-    if printout_:
+    if opprintout:
         print(output_df)
     elif output is None:
         warn("No output path specified.")
-        if confirm("Would you like to print the output DataFrame?"):
+        if click.confirm("Would you like to print the output DataFrame?"):
             print(output_df)
     else:
         if not validate_extension(output, ".csv"):
             output = f"{output}.csv"
             warn(f"Added CSV extension (new output: {output}).")
         if os.path.exists(output):
-            confirm(
+            click.confirm(
                 f"Output path {output} already exists."
                 "Do you want to overwrite?",
                 abort=True
@@ -220,19 +221,19 @@ def glitch(
 ):
     """Input parameters of one glitch"""
     if peak_freq is None:
-        peak_freq = prompt("Peak Frequency", type=float)
+        peak_freq = click.prompt("Peak Frequency", type=float)
     if snr is None:
-        snr = prompt("Signal-to-Noise Ratio", type=float)
+        snr = click.prompt("Signal-to-Noise Ratio", type=float)
     if amplitude is None:
-        amplitude = prompt("Amplitude", type=float)
+        amplitude = click.prompt("Amplitude", type=float)
     if central_freq is None:
-        central_freq = prompt("Central Frequency", type=float)
+        central_freq = click.prompt("Central Frequency", type=float)
     if duration is None:
-        duration = prompt("Duration", type=float)
+        duration = click.prompt("Duration", type=float)
     if bandwidth is None:
-        bandwidth = prompt("Bandwidth", type=float)
+        bandwidth = click.prompt("Bandwidth", type=float)
     if q_value is None:
-        q_value = prompt("Q-Value", type=float)
+        q_value = click.prompt("Q-Value", type=float)
     params = [
         peak_freq,
         snr,
