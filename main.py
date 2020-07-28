@@ -40,17 +40,17 @@ class CountTooHigh(HoleForestException):
 
 
 def info(msg, *args, **kwargs):
-    if verbose:
+    if opverbose:
         print("[~]", msg, *args, **kwargs)
 
 
 def warn(msg, *args, **kwargs):
-    if verbose:
+    if opverbose:
         print(Fore.YELLOW + "[+]", msg, Fore.RESET, *args, **kwargs)
 
 
 def success(msg, *args, **kwargs):
-    if verbose:
+    if opverbose:
         print(Fore.GREEN + "[+]", msg, Fore.RESET, *args, **kwargs)
 
 
