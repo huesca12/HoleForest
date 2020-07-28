@@ -12,7 +12,7 @@ PARAMS = [
     "peakFreq",
     "snr",
     "amplitude",
-    "centralFreq"
+    "centralFreq",
     "duration",
     "bandwidth",
     "Q-value"
