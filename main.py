@@ -7,7 +7,9 @@ import numpy as np
 import os
 import pandas as pd
 import sklearn
+from time import time
 
+s = time()
 MODEL_PATH = os.path.abspath(os.path.dirname(__file__)) + "/model/model.joblib"
 PARAMS = [
     "peakFreq",
@@ -40,19 +42,19 @@ class CountTooHigh(HoleForestException):
     """Raised when the count option is greater than the number of labels"""
 
 
-def info(msg, *args, **kwargs):
+def info(*args, **kwargs):
     if opverbose:
-        print("[~]", msg, *args, **kwargs)
+        print("[~]", *args, **kwargs)
 
 
-def warn(msg, *args, **kwargs):
+def warn(*args, **kwargs):
     if opverbose:
-        print(Fore.YELLOW + "[+]", msg, Fore.RESET, *args, **kwargs)
+        print(Fore.YELLOW + "[!]", *args, Fore.RESET, **kwargs)
 
 
-def success(msg, *args, **kwargs):
+def success(*args, **kwargs):
     if opverbose:
-        print(Fore.GREEN + "[+]", msg, Fore.RESET, *args, **kwargs)
+        print(Fore.GREEN + "[+]", *args, Fore.RESET, **kwargs)
 
 
 def load_df(file):
@@ -60,9 +62,7 @@ def load_df(file):
     info(f"Verifying DataFrame columns...")
     if not all(param in df for param in PARAMS):
         warn("DataFrame failed verification.")
-        raise MissingColumns(
-            f"DataFrame ({file}) missing necessary column(s)."
-        )
+        raise MissingColumns("DataFrame", file, "missing necessary column(s).")
     success("Verified DataFrame structure!")
     return df
 
@@ -122,7 +122,7 @@ def run_model(df, output):
             warn(f"Added CSV extension (new output: {output}).")
         if os.path.exists(output):
             click.confirm(
-                f"Output path {output} already exists."
+                f"Output path {output} already exists. "
                 "Do you want to overwrite?",
                 abort=True
             )
@@ -257,7 +257,7 @@ def glitch(
 @main.resultcallback()
 def process_result(_, **__):
     colorama.deinit()
-    success("Finished")
+    success("Finished |", time() - s, "seconds.")
 
 
 if __name__ == "__main__":
