@@ -102,4 +102,4 @@ The `main.py` file has a command `train` which trains a new model based on an in
 ```
 "peakFreq", "snr", "amplitude", "centralFreq", "duration", "bandwidth", "Q-value"
 ```
-or errors will be raised.
+These columns are necessary and hardcoded into the script as they represent the 7 glitch parameters. If these columns are not present, errors will be raised.

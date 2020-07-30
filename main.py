@@ -160,13 +160,15 @@ def train(file, output):
 
     info("Training model...")
     df = df.drop(
-        columns=["chisq", "chisqDof", "GPStime", "ifo", "imgUrl", "id", "confidence"]
+        columns=["chisq", "chisqDof", "GPStime", "ifo", "imgUrl", "id", "confidence"],
+        errors="ignore"
     )
     y = df["label"]
     x = df.drop(columns=["label"])
-    x_train, _, y_train, _ = train_test_split(x, y, random_state=0)
+    x_train, x_test, y_train, y_test = train_test_split(x, y, random_state=0)
     forest = RandomForestClassifier()
     forest.fit(x_train, y_train)
+    print("Traning set accuracy score (0-1): {:f}".format(forest.score(x_test, y_test)))
     joblib.dump(forest, output)
     success("Trained new model successfully!")
 
@@ -199,7 +201,7 @@ def predict(model_path, count, printout):
 @arg("file")
 @opt("--output", "-o", help="CSV output file path")
 @opt("--delete-extras", "-d", is_flag=True,
-     help="Remove extra columns from input to output")
+     help="Do not preserve extraneous columns in output")
 def csv(file, output, delete_extras):
     """Load CSV file of glitches"""
     info(f"Loading {file} into DataFrame...")
