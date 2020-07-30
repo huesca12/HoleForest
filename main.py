@@ -8,6 +8,7 @@ import os
 import pandas as pd
 import sklearn
 from time import time
+from sklearn.ensemble import RandomForestClassifier
 
 s = time()
 MODEL_PATH = os.path.abspath(os.path.dirname(__file__)) + "/model/model.joblib"
@@ -155,6 +156,31 @@ def train(file, output):
         warn(f"Added .joblib extension (new output: {output}).")
     info("Training model...")
     # Nicolas Puts Code Here
+    dropList = ["chisq", "chisqDof", "GPStime", "ifo", "imgUrl", "id"]
+    mainDf = df.drop(columns=dropList)
+    # ask if the user wants a minimum confidence rating
+    query = input("Would you like to drop data entries below a particular GSpy confidence rating? (y/n): ")
+    if query == "y":
+        # if so, ask for the desired minimum (and convert str to float)
+        n = float(input("Minimum confidence rating (decimal between 0 and 1 inclusive): "))
+        # filter mainDF for the minimum
+        mainDf = mainDf[mainDf["confidence"] >= n]
+    # ultimately, drop confidence column
+    mainDf = mainDf.drop(columns="confidence")
+    print(f"Final data set has {len(mainDf)} total entries.")
+    # tags only!
+    y = mainDf["label"]
+    # features only!
+    X = mainDf.drop(columns="label")
+    # honest training
+    # TODO: specify split
+    X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
+    # get our model
+    model = RandomForestClassifier()
+    # fit our model
+    model.fit(X_train, y_train)
+    # print accuracy of model on test set
+    print("The traning set score is: {:f}".format(model.score(X_test, y_test)))
     success("Trained new model successfully!")
 
 
