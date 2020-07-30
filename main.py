@@ -182,6 +182,7 @@ def train(file, output):
     # print accuracy of model on test set
     print("The traning set score is: {:f}".format(model.score(X_test, y_test)))
     success("Trained new model successfully!")
+    joblib.save(model, output)
 
 
 @main.group()
