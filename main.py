@@ -116,7 +116,7 @@ def run_model(df, output):
         warn("No output path specified.")
         if click.confirm("Would you like to print the output DataFrame?"):
             print(output_df)
-    else:
+    if output:
         if not validate_extension(output, ".csv"):
             output = f"{output}.csv"
             warn(f"Added CSV extension (new output: {output}).")
