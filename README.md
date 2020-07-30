@@ -30,3 +30,53 @@ Get the latest image of HoleForest from Docker Hub:
 docker pull huesca12/holeforest:latest
 ```
 ## Features
+
+`main.py`
+
+&nbsp;&nbsp;&nbsp;&nbsp;`-v/--verbose` | Flag<br>
+&nbsp;&nbsp;&nbsp;&nbsp;If enabled, print extra/debug messages
+
+&nbsp;&nbsp;&nbsp;&nbsp;`predict` | Command<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Classify glitches command (more info below)
+
+&nbsp;&nbsp;&nbsp;&nbsp;`train` | Command<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Train a new ML model from an input data set (more info below)
+
+### Predict
+
+`main.py predict`
+
+The `main.py` file has a command `predict` which utilizes a machine learning model (Random Forest) to classify glitches based on 7 characteristics.
+
+&nbsp;&nbsp;&nbsp;&nbsp;`-m/--model` | Option (str)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Path to model file (defulat: model/model.joblib)
+
+&nbsp;&nbsp;&nbsp;&nbsp;`-c/--count` | Option (int)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;How many glitch (and probability) guesses to make
+
+&nbsp;&nbsp;&nbsp;&nbsp;`-p/--printout` | Flag<br>
+&nbsp;&nbsp;&nbsp;&nbsp;If enabled, print the output DataFrame
+
+&nbsp;&nbsp;&nbsp;&nbsp;`csv` | Command<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Classify a CSV of glitches
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`FILE` | Argument (str)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CSV of glitches to classify
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`-o/--output` | Option (str)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Path to file for saving output DataFrame
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`-d/--delete-extras` | Flag <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Do not preserve extraneous columns in output
+
+&nbsp;&nbsp;&nbsp;&nbsp;`glitch` | Command<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Classify one glitch by inputting 7 values
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`-o/--output` | Option (str)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Path to file for saving output DataFrame
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;For inputting parameter values, the user may use options.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If options are not supplied, the user is prompted.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`python main.py predict glitch --help` for more.<br>
+
+### Train
