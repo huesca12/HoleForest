@@ -20,6 +20,12 @@ You should now be able to run HoleForest by using the command in the same direct
 ```bash
 python main.py
 ```
+**Recommended**: The model file generated on one machine may not be loaded properly on a different machine. So, the user may train a model using a supplifed data set with the following command:
+```bash
+python main.py train model/train.csv trained_model.joblib
+```
+Keep in mind, a model **has** been provided at `model/model.joblib` by using the training set, but it is highly recommended and sometimes necessary to train on a new machine.
+
 ### Docker Image
 Ensure that Docker is installed in your working enviroment using:
 ```bash
@@ -29,6 +35,7 @@ Get the latest image of HoleForest from Docker Hub:
 ```bash
 docker pull huesca12/holeforest:latest
 ```
+
 ## Features
 
 `main.py`
@@ -44,9 +51,9 @@ docker pull huesca12/holeforest:latest
 
 ### Predict
 
-`main.py predict`
-
 The `main.py` file has a command `predict` which utilizes a machine learning model (Random Forest) to classify glitches based on 7 characteristics.
+
+`main.py predict`
 
 &nbsp;&nbsp;&nbsp;&nbsp;`-m/--model` | Option (str)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Path to model file (defulat: model/model.joblib)
@@ -80,3 +87,19 @@ The `main.py` file has a command `predict` which utilizes a machine learning mod
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`python main.py predict glitch --help` for more.<br>
 
 ### Train
+
+The `main.py` file has a command `train` which trains a new model based on an input data set.
+
+`main.py train`
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`FILE` | Argument (str)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CSV of glitches on which to train
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`OUTPUT` | Argument (str)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Path to output .joblib model file
+
+**NOTE**: The input CSV for both the `predict` and `train` commands **must** have the following columns:
+```
+"peakFreq", "snr", "amplitude", "centralFreq", "duration", "bandwidth", "Q-value"
+```
+or errors will be raised.
