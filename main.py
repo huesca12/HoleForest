@@ -59,7 +59,7 @@ def success(*args, **kwargs):
 
 
 def load_df(file):
-    df = pd.read_csv(file, error_bad_lines=False)
+    df = pd.read_csv(file)
     info(f"Verifying DataFrame columns...")
     if not all(param in df for param in PARAMS):
         warn("DataFrame failed verification.")
