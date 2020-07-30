@@ -24,7 +24,7 @@ python main.py
 ```bash
 python main.py train model/train.csv trained_model.joblib
 ```
-Keep in mind, a model **has** been provided at `model/model.joblib`, but it is highly recommended and sometimes necessary to train on a new machine.
+Keep in mind, a model has been provided at `model/model.joblib`, but it is highly recommended and sometimes necessary to train on a new machine. To use the newly trained model, either use the `-m/--model-path` option or delete the supplied model and move the new model to `model/model.joblib`.
 
 ### Docker Image
 Ensure that Docker is installed in your working enviroment using:
@@ -55,7 +55,7 @@ The `main.py` file has a command `predict` which utilizes a machine learning mod
 
 `main.py predict`
 
-&nbsp;&nbsp;&nbsp;&nbsp;`-m/--model` | Option (str)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;`-m/--model-path` | Option (str)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Path to model file (defulat: model/model.joblib)
 
 &nbsp;&nbsp;&nbsp;&nbsp;`-c/--count` | Option (int)<br>
