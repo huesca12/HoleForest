@@ -9,6 +9,8 @@ import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from time import time
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
 
 s = time()
 MODEL_PATH = os.path.abspath(os.path.dirname(__file__)) + "/model/model.joblib"
@@ -157,6 +159,9 @@ def train(file, output):
         warn(f"Added .joblib extension (new output: {output}).")
 
     info("Training model...")
+    df = df.drop(
+        columns=["chisq", "chisqDof", "GPStime", "ifo", "imgUrl", "id", "confidence"]
+    )
     y = df["label"]
     x = df.drop(columns=["label"])
     x_train, _, y_train, _ = train_test_split(x, y, random_state=0)
