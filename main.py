@@ -9,6 +9,7 @@ import pandas as pd
 import sklearn
 from time import time
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
 
 s = time()
 MODEL_PATH = os.path.abspath(os.path.dirname(__file__)) + "/model/model.joblib"
