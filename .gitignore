@@ -129,7 +129,4 @@ dmypy.json
 .pyre/
 
 # PyCharm
-.idea/
-
-# Save lfs
-model/model.joblib
+.idea

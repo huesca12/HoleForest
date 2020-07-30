@@ -6,7 +6,8 @@ import joblib
 import numpy as np
 import os
 import pandas as pd
-import sklearn
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
 from time import time
 
 s = time()
@@ -116,6 +117,7 @@ def run_model(df, output):
         warn("No output path specified.")
         if click.confirm("Would you like to print the output DataFrame?"):
             print(output_df)
+
     if output:
         if not validate_extension(output, ".csv"):
             output = f"{output}.csv"
@@ -153,8 +155,14 @@ def train(file, output):
     if not validate_extension(output, ".joblib"):
         output = f"{output}.joblib"
         warn(f"Added .joblib extension (new output: {output}).")
+
     info("Training model...")
-    # Nicolas Puts Code Here
+    y = df["label"]
+    x = df.drop(columns=["label"])
+    x_train, _, y_train, _ = train_test_split(x, y, random_state=0)
+    forest = RandomForestClassifier()
+    forest.fit(x_train, y_train)
+    joblib.dump(forest, output)
     success("Trained new model successfully!")
 
 
