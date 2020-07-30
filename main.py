@@ -160,7 +160,8 @@ def train(file, output):
 
     info("Training model...")
     df = df.drop(
-        columns=["chisq", "chisqDof", "GPStime", "ifo", "imgUrl", "id", "confidence"],
+        columns=["chisq", "chisqDof", "GPStime",
+                 "ifo", "imgUrl", "id", "confidence"],
         errors="ignore"
     )
     y = df["label"]
@@ -168,7 +169,8 @@ def train(file, output):
     x_train, x_test, y_train, y_test = train_test_split(x, y, random_state=0)
     forest = RandomForestClassifier()
     forest.fit(x_train, y_train)
-    print("Traning set accuracy score (0-1): {:f}".format(forest.score(x_test, y_test)))
+    print("Traning set accuracy score (0-1): {:f}"
+          .format(forest.score(x_test, y_test)))
     joblib.dump(forest, output)
     success("Trained new model successfully!")
 
