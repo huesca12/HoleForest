@@ -1,5 +1,5 @@
 import click
-from click import argument as arg, command, group, option as opt
+from click import argument as arg, group, option as opt
 import colorama
 from colorama import Fore
 import joblib
@@ -81,6 +81,15 @@ def validate_extension(path, ext):
     return True
 
 
+def validate_output(path):
+    if os.path.exists(path):
+        click.confirm(
+            f"Output path {path} already exists. "
+            "Do you want to overwrite?",
+            abort=True
+        )
+
+
 def run_model(df, output):
     guesses = model.predict_proba(df[PARAMS])
 
@@ -122,12 +131,7 @@ def run_model(df, output):
         if not validate_extension(output, ".csv"):
             output = f"{output}.csv"
             warn(f"Added CSV extension (new output: {output}).")
-        if os.path.exists(output):
-            click.confirm(
-                f"Output path {output} already exists. "
-                "Do you want to overwrite?",
-                abort=True
-            )
+        validate_output(output)
         output_df.to_csv(output, index=False)
         success(f"Saved output to {output}")
 
@@ -169,6 +173,7 @@ def train(file, output):
     forest.fit(x_train, y_train)
     print("Traning set accuracy score (0-1): {:f}"
           .format(forest.score(x_test, y_test)))
+    validate_output(output)
     joblib.dump(forest, output)
     success("Trained new model successfully!")
 
